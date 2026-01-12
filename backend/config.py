@@ -10,7 +10,7 @@ PERPLEXITY_API_KEY=os.getenv("PERPLEXITY_API_KEY")
 DEEPSEEK_API_KEY=os.getenv("DEEPSEEK_API_KEY")#do they have free api key?
 
 STREAM_MODE=os.getenv("STREAM_MODE","token")
-DATABASE_URL=os.getenv("DATABASE_URL","what-will-it-be")
+DATABASE_URL=os.getenv("DATABASE_URL","sqlite:///./data/ai_council.db")
 
 # models which the frontend should see
 OPENROUTER_MODELS = [

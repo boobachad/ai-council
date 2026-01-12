@@ -1,6 +1,1 @@
-fastapi>=0.110.0
-uvicorn>=0.29.0
-python-dotenv>=1.0.1
-sqlalchemy>=2.0.28
-httpx>=0.27.0
-asyncio
+# dont need this we have pyprojecttoml and uv lock 
