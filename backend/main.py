@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
     if not config.OPENROUTER_MODELS:
         raise RuntimeError("OPENROUTER_MODELS not set in config")
         
-models.Base.metadata.create_all(bind=engine)
+    models.Base.metadata.create_all(bind=engine)
 
     app.state.http_client=httpx.AsyncClient(timeout=120.0)
 
@@ -27,7 +27,7 @@ models.Base.metadata.create_all(bind=engine)
 
     await app.state.http_client.aclose()
 
-app=FastAPI(title="AI Council",lifespan=lifespan)
+app = FastAPI(title="AI Council", lifespan=lifespan)
 
 class SimpleChatRequest(BaseModel):
     message: str
@@ -54,12 +54,12 @@ async def test_chat_msg(request: SimpleChatRequest, req: Request):
                 headers=headers,
                 json=payload
             )
-            response.raise_for_status()
+        response.raise_for_status()
         
         data=response.json()
         content=data['choices'][0]['message']['content']
             
-            return {"response": content}
+        return {"response": content}
     except httpx.HTTPStatusError as e:
         raise HTTPException(status_code=e.response.status_code,detail=f"OpenRouter error: {e.response.text}")
     except Exception as e:
