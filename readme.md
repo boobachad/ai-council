@@ -37,3 +37,7 @@ Like the leaf models will pass the response to the parents the parents are gonna
 an response based on its child and pass the reply to it's parents and finally the root model gives the response to the user.
 How is this useful.
 each parent only have to store the conversation of its own and its two childrens. 
+
+## Today's task(20 - 1 - 2026):
+
+1. implement the heirarchy structure as discussed above.
