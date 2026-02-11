@@ -19,14 +19,12 @@ DATABASE_URL=os.getenv("DATABASE_URL","sqlite:///./data/ai_council.db")
 
 # models which the frontend should see
 OPENROUTER_MODELS = [
-    "allenai/molmo-2-8b:free"
+    "allenai/molmo-2-8b:free",
+    "google/gemma-3-12b-it:free",
+    "openai/gpt-oss-120b:free"
     # "provider-name/model-name" #the free-ones will be listed here need to figure out the exact way to list them
 ]
 
-GEMINI_MODELS = [
-    "model-name"
-]
-
-PERPLEXITY_MODELS = [
+CHAIRMAN_MODELS = [
     "model-name"
 ]
