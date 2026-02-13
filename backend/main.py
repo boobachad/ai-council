@@ -8,6 +8,7 @@ from .database import engine
 from . import models
 
 from contextlib import asynccontextmanager
+from .services.llm_engine import run_group
 import httpx
 
 @asynccontextmanager
@@ -34,32 +35,22 @@ class SimpleChatRequest(BaseModel):
 
 @app.post("/api/chat")
 async def test_chat_msg(request: SimpleChatRequest, req: Request):
+
     # dont recreate for every request
     client=req.app.state.http_client
-    # Use first model from config
-    model=config.OPENROUTER_MODELS[0]
-    
-    headers = {
-        "Authorization": f"Bearer {config.OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-    }
-    payload = {
-        "model":model,
-        "messages": [{"role":"user","content":request.message}]
-    }
+
+    # takes the first three models as input
+    leaf_models = config.OPENROUTER_MODELS[:3]
     
     try:
-        response=await client.post(
-                config.OPENROUTER_API_URL,
-                headers=headers,
-                json=payload
+        leaf_consensus = await run_group(
+                client = client,
+                models = leaf_models,
+                user_prompt = request.message
             )
-        response.raise_for_status()
         
-        data=response.json()
-        content=data['choices'][0]['message']['content']
-            
-        return {"response": content}
+        return {"response": leaf_consensus}
+    
     except httpx.HTTPStatusError as e:
         raise HTTPException(status_code=e.response.status_code,detail=f"OpenRouter error: {e.response.text}")
     except Exception as e:
