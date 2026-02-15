@@ -1,11 +1,14 @@
 import asyncio
 import httpx
 from .. import config
+OPENROUTER_API_KEY = config.OPENROUTER_API_KEY
 
 async def call_llm(client: httpx.AsyncClient, model: str, messages: list):
     headers = {
-        "Authorization": f"Bearer {config.OPENROUTER_API_KEY}",
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
+        "X-Title": "AI Council App",
+        "X-Data-Policy": "open"
     }
 
     payload = {
