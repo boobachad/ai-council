@@ -56,17 +56,31 @@ def build_leaf_deliberation_prompt(user_prompt: str, leaf_outputs: list[str]):
     ]
 
 
-async def run_group(client: httpx.AsyncClient, models: list[str], user_prompt: str):
+async def run_group(client: httpx.AsyncClient, member_models: list[str], chairman_model: str, user_prompt: str):
     # Phase 1: independent answers
     tasks = [
         call_llm(client, model, build_leaf_prompt(user_prompt))
-        for model in models
+        for model in member_models
     ]
-    leaf_outputs = await asyncio.gather(*tasks)
+    results=await asyncio.gather(*tasks,return_exceptions=True)
+    
+    leaf_outputs=[]
+    successful_leaf_outputs=[]
+    for idx,res in enumerate(results):
+        model_name=member_models[idx]
+        if isinstance(res,Exception):
+            leaf_outputs.append(f"{model_name}: No response due to error: {str(res)}")
+        else:
+            leaf_outputs.append(f"{model_name}:\n{res}")
+            successful_leaf_outputs.append(res)
 
     # Phase 2: deliberation
-    deliberation_prompt = build_leaf_deliberation_prompt(user_prompt, leaf_outputs)
-    deliberator_model = models[0]
+    deliberation_prompt=build_leaf_deliberation_prompt(user_prompt,successful_leaf_outputs)
 
-    consensus = await call_llm(client, deliberator_model, deliberation_prompt)
+    try:
+        raw_consensus=await call_llm(client,chairman_model,deliberation_prompt)
+        consensus=f"{chairman_model}:\n{raw_consensus}"
+    except Exception as e:
+        consensus=f"{chairman_model}: No response due to error: {str(e)}"
+        
     return {"leaf_outputs":leaf_outputs,"consensus":consensus}

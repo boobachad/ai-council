@@ -17,8 +17,8 @@ async def lifespan(app: FastAPI):
     if not config.OPENROUTER_API_KEY:
         raise RuntimeError("OPENROUTER_API_KEY not set in environment")
     
-    if not config.OPENROUTER_MODELS:
-        raise RuntimeError("OPENROUTER_MODELS not set in config")
+    if not config.MEMBER_MODELS:
+        raise RuntimeError("MEMBER_MODELS not set in config")
         
     models.Base.metadata.create_all(bind=engine)
 
@@ -40,12 +40,14 @@ async def test_chat_msg(request: SimpleChatRequest, req: Request):
     client=req.app.state.http_client
 
     # takes the first three models as input
-    leaf_models = config.OPENROUTER_MODELS[:3]
+    leaf_models = config.MEMBER_MODELS[:3]
+    chairman_model = config.CHAIRMAN_MODELS[0]
     
     try:
         result=await run_group(
                 client=client,
-                models=leaf_models,
+                member_models=leaf_models,
+                chairman_model=chairman_model,
                 user_prompt=request.message
             )
         
@@ -57,11 +59,18 @@ async def test_chat_msg(request: SimpleChatRequest, req: Request):
         raise HTTPException(status_code=500,detail=str(e))
 
 
+@app.get("/api/models")
+def get_models():
+    return {
+        "member_models": config.MEMBER_MODELS,
+        "chairman_models": config.CHAIRMAN_MODELS
+    }
+
 @app.get("/")
 def root():
     models={}
     if config.OPENROUTER_API_KEY:
-        models["openrouter"]=config.OPENROUTER_MODELS
+        models["openrouter"]=config.MEMBER_MODELS
     if config.GEMINI_API_KEY:
         models["gemini"]=config.GEMINI_MODELS
     if config.PERPLEXITY_API_KEY:

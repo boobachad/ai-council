@@ -18,13 +18,15 @@ STREAM_MODE=os.getenv("STREAM_MODE","block") #we need to check this thing called
 DATABASE_URL=os.getenv("DATABASE_URL","sqlite:///./data/ai_council.db")
 
 # models which the frontend should see
-OPENROUTER_MODELS = [
+MEMBER_MODELS = [
+    "qwen/qwen3-coder:free",
     "liquid/lfm-2.5-1.2b-instruct:free",
-    "google/gemma-3-27b-it:free",
+    # "google/gemma-3-27b-it:free",--repeatedly getting developer instruction is not enabled for models/gemma-3-27b-it
+    "stepfun/step-3.5-flash:free",
     # "cognitivecomputations/dolphin-mistral-24b-venice-edition:free"
     # "provider-name/model-name" #the free-ones will be listed here need to figure out the exact way to list them
 ]
 
 CHAIRMAN_MODELS = [
-    "model-name"
+    "nvidia/nemotron-3-nano-30b-a3b:free"
 ]
