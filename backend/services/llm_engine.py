@@ -69,5 +69,4 @@ async def run_group(client: httpx.AsyncClient, models: list[str], user_prompt: s
     deliberator_model = models[0]
 
     consensus = await call_llm(client, deliberator_model, deliberation_prompt)
-    return consensus
-    
+    return {"leaf_outputs":leaf_outputs,"consensus":consensus}

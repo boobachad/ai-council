@@ -43,13 +43,13 @@ async def test_chat_msg(request: SimpleChatRequest, req: Request):
     leaf_models = config.OPENROUTER_MODELS[:3]
     
     try:
-        leaf_consensus = await run_group(
-                client = client,
-                models = leaf_models,
-                user_prompt = request.message
+        result=await run_group(
+                client=client,
+                models=leaf_models,
+                user_prompt=request.message
             )
         
-        return {"response": leaf_consensus}
+        return {"response":result["consensus"],"intermediate":result["leaf_outputs"]}
     
     except httpx.HTTPStatusError as e:
         raise HTTPException(status_code=e.response.status_code,detail=f"OpenRouter error: {e.response.text}")
