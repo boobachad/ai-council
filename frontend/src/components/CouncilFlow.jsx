@@ -16,7 +16,9 @@ import '@xyflow/react/dist/style.css';
 
 const CustomNode = ({ data, id }) => {
     return (
-        <div className="card" style={{ padding: '1rem', minWidth: '150px', maxWidth: '300px' }}>
+        <div className="card nowheel" style={{
+            padding: '1rem', minWidth: '350px', maxWidth: '600px', maxHeight: '500px', overflowY: 'auto', ...(data.style || {})
+        }}>
             {id !== 'user-prompt' && (
                 <Handle type="target" position={Position.Left} style={{ background: '#555' }} />
             )}
@@ -38,14 +40,14 @@ const initialNodes = [
     {
         id: 'user-prompt',
         data: { label: 'User Prompt' },
-        position: { x: 50, y: 250 },
+        position: { x: 50, y: 650 },
         type: 'custom',
         sourcePosition: 'right',
     },
     {
         id: 'member-1',
         data: { label: 'Member 1' },
-        position: { x: 350, y: 150 },
+        position: { x: 500, y: 50 },
         type: 'custom',
         targetPosition: 'left',
         sourcePosition: 'right',
@@ -53,7 +55,7 @@ const initialNodes = [
     {
         id: 'member-2',
         data: { label: 'Member 2' },
-        position: { x: 350, y: 250 },
+        position: { x: 500, y: 650 },
         type: 'custom',
         targetPosition: 'left',
         sourcePosition: 'right',
@@ -61,7 +63,7 @@ const initialNodes = [
     {
         id: 'member-3',
         data: { label: 'Member 3' },
-        position: { x: 350, y: 350 },
+        position: { x: 500, y: 1250 },
         type: 'custom',
         targetPosition: 'left',
         sourcePosition: 'right',
@@ -69,7 +71,7 @@ const initialNodes = [
     {
         id: 'chairman',
         data: { label: 'Chairman' },
-        position: { x: 700, y: 250 },
+        position: { x: 1200, y: 650 },
         type: 'custom',
         targetPosition: 'left',
     },
