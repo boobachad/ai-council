@@ -12,8 +12,11 @@
 
 1. clone this repo and go to root(repo/foldername) folder search how?
 2. run `uv sync` to install libraries
-3. `uv run python -m backend.main`
-
+<!-- 3. `uv run python -m backend.main` -->//now not needed cause of start script
+4. Run `cd frontend && bun install` //bun install once again cause we have portless now
+5. Copy `.env.example` to `.env` and add API keys
+6. in root folder run `chmod +x start.sh` for permission
+7. Run `./start.sh` 
 ---
 
 # What is Context Size of an LLM?
