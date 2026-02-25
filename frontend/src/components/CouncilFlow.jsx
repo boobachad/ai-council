@@ -125,7 +125,7 @@ export default function CouncilFlow() {
         setIsLoading(true);
         setPrompt("");
 
-        // Reset nodes to loading state and update user prompt node
+        // turn nodes to thinking and dump input box contnet to user-prompt node
         setNodes((nds) => nds.map((node) => {
             if (node.id === 'user-prompt') return { ...node, data: { ...node.data, label: currPrompt } };
             if (node.id.startsWith('member-') || node.id === 'chairman') {
