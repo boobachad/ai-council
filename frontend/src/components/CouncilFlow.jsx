@@ -1,5 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
+import { Streamdown } from 'streamdown';
+import 'streamdown/styles.css';
 import {
     ReactFlow,
     Controls,
@@ -19,7 +21,7 @@ const CustomNode = ({ data, id }) => {
                 <Handle type="target" position={Position.Left} style={{ background: '#555' }} />
             )}
             <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.875rem' }}>
-                {data.label}
+                <Streamdown>{data.label || ""}</Streamdown>
             </div>
             {id !== 'chairman' && (
                 <Handle type="source" position={Position.Right} style={{ background: '#555' }} />
