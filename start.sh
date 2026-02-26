@@ -11,12 +11,12 @@ trap cleanup SIGINT
 
 echo "backend: api.own-council.localhost"
 source .venv/bin/activate
-bun x portless api.own-council python -m backend.main &
+bun x portless api.own-council --force python -m backend.main &
 BACKEND_PID=$!
 
 echo "frontend: own-council.localhost"
 cd frontend
-bun x portless own-council bun run dev &
+bun x portless own-council --force bun run dev &
 FRONTEND_PID=$!
 cd ..
 

@@ -8,7 +8,6 @@ from .database import engine
 from . import models
 
 from contextlib import asynccontextmanager
-from .services.llm_engine import run_group
 import httpx
 
 @asynccontextmanager
@@ -33,6 +32,9 @@ app = FastAPI(title="AI Council", lifespan=lifespan)
 class SimpleChatRequest(BaseModel):
     message: str
 
+from fastapi.responses import StreamingResponse
+from .services.llm_engine import stream_group
+
 @app.post("/api/chat")
 async def test_chat_msg(request: SimpleChatRequest, req: Request):
 
@@ -44,17 +46,15 @@ async def test_chat_msg(request: SimpleChatRequest, req: Request):
     chairman_model = config.CHAIRMAN_MODELS[0]
     
     try:
-        result=await run_group(
+        return StreamingResponse(
+            stream_group(
                 client=client,
                 member_models=leaf_models,
                 chairman_model=chairman_model,
                 user_prompt=request.message
-            )
-        
-        return {"response":result["consensus"],"intermediate":result["leaf_outputs"]}
-    
-    except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code,detail=f"OpenRouter error: {e.response.text}")
+            ),
+            media_type="application/x-ndjson"
+        )
     except Exception as e:
         raise HTTPException(status_code=500,detail=str(e))
 

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
-import { Streamdown } from 'streamdown';
-import 'streamdown/styles.css';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
     ReactFlow,
     Controls,
@@ -22,8 +22,10 @@ const CustomNode = ({ data, id }) => {
             {id !== 'user-prompt' && (
                 <Handle type="target" position={Position.Left} style={{ background: '#555' }} />
             )}
-            <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.875rem' }}>
-                <Streamdown>{data.label || ""}</Streamdown>
+            <div style={{ fontSize: '0.875rem' }}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {data.label || ""}
+                </ReactMarkdown>
             </div>
             {id !== 'chairman' && (
                 <Handle type="source" position={Position.Right} style={{ background: '#555' }} />
@@ -129,33 +131,93 @@ export default function CouncilFlow() {
         setIsLoading(true);
         setPrompt("");
 
-        // turn nodes to thinking and dump input box contnet to user-prompt node
+        // Clear nodes for streaming and set user prompt
         setNodes((nds) => nds.map((node) => {
             if (node.id === 'user-prompt') return { ...node, data: { ...node.data, label: currPrompt } };
             if (node.id.startsWith('member-') || node.id === 'chairman') {
-                return { ...node, data: { ...node.data, label: 'Thinking...' } };
+                return { ...node, data: { ...node.data, label: '' } };
             }
             return node;
         }));
 
         try {
-            const res = await axios.post('/api/chat', { message: currPrompt });
-            console.log("Response:", res.data);
-            const { response, intermediate } = res.data;
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: currPrompt })
+            });
 
-            setNodes((nds) => nds.map((node) => {
-                if (node.id === 'member-1') return { ...node, data: { ...node.data, label: intermediate && intermediate[0] ? intermediate[0] : 'No response' } };
-                if (node.id === 'member-2') return { ...node, data: { ...node.data, label: intermediate && intermediate[1] ? intermediate[1] : 'No response' } };
-                if (node.id === 'member-3') return { ...node, data: { ...node.data, label: intermediate && intermediate[2] ? intermediate[2] : 'No response' } };
-                if (node.id === 'chairman') return { ...node, data: { ...node.data, label: response || 'No response' } };
-                return node;
-            }));
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+
+                // Keep the last partial line in the buffer
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (line.trim()) {
+                        try {
+                            const data = JSON.parse(line);
+                            setNodes((nds) => nds.map((node) => {
+                                if (node.id === data.node) {
+                                    return {
+                                        ...node,
+                                        data: {
+                                            ...node.data,
+                                            label: node.data.label + data.chunk
+                                        }
+                                    };
+                                }
+                                return node;
+                            }));
+                        } catch (err) {
+                            console.error("Error parsing stream chunk:", err, line);
+                        }
+                    }
+                }
+            }
+
+            // process any remaining buffer
+            if (buffer.trim()) {
+                try {
+                    const data = JSON.parse(buffer);
+                    setNodes((nds) => nds.map((node) => {
+                        if (node.id === data.node) {
+                            return {
+                                ...node,
+                                data: {
+                                    ...node.data,
+                                    label: node.data.label + data.chunk
+                                }
+                            };
+                        }
+                        return node;
+                    }));
+                } catch (err) {
+                    console.error("Error parsing stream chunk:", err, buffer);
+                }
+            }
 
         } catch (error) {
             console.error("Error calling council API", error);
             setNodes((nds) => nds.map((node) => {
                 if (node.id.startsWith('member-') || node.id === 'chairman') {
-                    return { ...node, data: { ...node.data, label: 'Error occurred' } };
+                    if (!node.data.label) {
+                        return { ...node, data: { ...node.data, label: 'Error occurred' } };
+                    }
                 }
                 return node;
             }));

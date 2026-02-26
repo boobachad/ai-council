@@ -19,7 +19,7 @@ DATABASE_URL=os.getenv("DATABASE_URL","sqlite:///./data/ai_council.db")
 
 # models which the frontend should see
 MEMBER_MODELS = [
-    "qwen/qwen3-coder:free",
+    "stepfun/step-3.5-flash:free",
     "liquid/lfm-2.5-1.2b-instruct:free",
     # "google/gemma-3-27b-it:free",--repeatedly getting developer instruction is not enabled for models/gemma-3-27b-it
     "stepfun/step-3.5-flash:free",
